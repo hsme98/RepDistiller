@@ -40,6 +40,7 @@ def parse_option():
     parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 
     # dataset
+    parser.add_argument('--cuda_dev',type=int, default=0)
     parser.add_argument('--model', type=str, default='resnet110',
                         choices=['resnet8', 'resnet14', 'resnet20', 'resnet32', 'resnet44', 'resnet56', 'resnet110',
                                  'resnet8x4', 'resnet32x4', 'wrn_16_1', 'wrn_16_2', 'wrn_40_1', 'wrn_40_2',
@@ -86,7 +87,6 @@ def main():
     best_acc = 0
 
     opt = parse_option()
-
     # dataloader
     if opt.dataset == 'cifar100':
         train_loader, val_loader = get_cifar100_dataloaders(batch_size=opt.batch_size, num_workers=opt.num_workers)
@@ -106,6 +106,7 @@ def main():
     criterion = nn.CrossEntropyLoss()
 
     if torch.cuda.is_available():
+        torch.cuda.set_device(opt.cuda_dev)
         model = model.cuda()
         criterion = criterion.cuda()
         cudnn.benchmark = True
@@ -117,7 +118,7 @@ def main():
     for epoch in range(1, opt.epochs + 1):
 
         adjust_learning_rate(epoch, opt, optimizer)
-        print("==> training...")
+        print(f"==> training {epoch}/{opt.epochs}:")
 
         time1 = time.time()
         train_acc, train_loss = train(epoch, train_loader, model, criterion, optimizer, opt)
