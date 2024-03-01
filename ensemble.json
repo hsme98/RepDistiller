@@ -1,0 +1,9 @@
+{
+  "ensemble": [
+    "save/models/resnet20_cifar100_lr_0.05_decay_0.0005_trial_0/resnet20_best.pth",
+    "save/models/resnet20_cifar100_lr_0.05_decay_0.0005_trial_1/resnet20_best.pth",
+    "save/models/resnet20_cifar100_lr_0.05_decay_0.0005_trial_2/resnet20_best.pth",
+    "save/models/resnet20_cifar100_lr_0.05_decay_0.0005_trial_3/resnet20_best.pth"
+
+  ]
+}

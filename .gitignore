@@ -1,6 +1,7 @@
 .idea/
 save/
 data/
+data_old/
 output*/
 ckpts/
 *.pth
