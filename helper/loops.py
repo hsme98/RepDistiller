@@ -64,7 +64,9 @@ def train_vanilla(epoch, train_loader, model, criterion, optimizer, opt):
 
     return top1.avg, losses.avg
 
+# mod is one of the 'reg', 'joint', 'joint_single'
 def train_distill_ensemble(epoch, train_loader, module_list, criterion_list, optimizer, opt):
+    assert(opt.joint_mode in ['reg', 'joint', 'joint_single'])
     """One epoch ensemble distillation"""
     # set modules as train()
     for module in module_list:
@@ -135,7 +137,13 @@ def train_distill_ensemble(epoch, train_loader, module_list, criterion_list, opt
         elif opt.distill == 'crd':
             f_s = feat_s[-1]
             f_ts = [feat_t[-1] for feat_t in feat_ts]
-            loss_kds = [criterion_kd(f_s, f_t, index, contrast_idx) for f_t, criterion_kd in zip(f_ts, criterion_kds)]
+
+            if opt.joint_mode =="joint":
+                loss_kds = [criterion_kds[0](f_s, torch.cat(f_ts, dim=-1), index, contrast_idx)]
+            elif opt.joint_mode =="joint_single":
+                loss_kds = [criterion_kds[0](f_s, f_t,index, contrast_idx) for f_t in f_ts]
+            else:
+                loss_kds = [criterion_kd(f_s, f_t, index, contrast_idx) for f_t, criterion_kd in zip(f_ts, criterion_kds)]
         else:
             raise NotImplementedError(opt.distill)
 

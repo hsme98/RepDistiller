@@ -72,8 +72,6 @@ def parse_option():
     parser.add_argument('-a', '--alpha', type=float, default=None, help='weight balance for KD')
     parser.add_argument('-b', '--beta', type=float, default=None, help='weight balance for other losses')
 
-    parser.add_argument('--joint_mode', type=str, default=None, help='type of the joint training objective. one of the reg, joint, joint_single')
-
     # KL distillation
     parser.add_argument('--kd_T', type=float, default=4, help='temperature for KD distillation')
 
@@ -119,7 +117,7 @@ def parse_option():
 
     ensemble_name = os.path.basename(opt.path_ensemble)
 
-    opt.model_name = 'S:{}_T:{}_{}_{}_r:{}_a:{}_b:{}_{}'.format(opt.model_s, ensemble_name, opt.dataset, opt.distill,
+    opt.model_name = 'S:{}_T:{}_{}_{}_r:{}_a:{}_b:{}_{}_joint'.format(opt.model_s, ensemble_name, opt.dataset, opt.distill,
                                                                 opt.gamma, opt.alpha, opt.beta, opt.trial)
 
     opt.tb_folder = os.path.join(opt.tb_path, opt.model_name)
@@ -197,37 +195,15 @@ def main():
     if opt.distill == 'kd':
         criterion_kd = DistillKL(opt.kd_T)
     elif opt.distill == 'crd':
-        if opt.joint_mode == 'reg':
-            opt.s_dim = feat_s[-1].shape[1]
-            opt.t_dim = feat_ts[-1][-1].shape[1]
-            for feat_t in feat_ts:
-                opt.n_data = n_data
-                criterion_kd = CRDLoss(opt)
-                module_list.append(criterion_kd.embed_s)
-                module_list.append(criterion_kd.embed_t)
-                trainable_list.append(criterion_kd.embed_s)
-                trainable_list.append(criterion_kd.embed_t)
-                criterion_kds.append(criterion_kd)
-        elif opt.joint_mode == "joint":
-            opt.s_dim = feat_s[-1].shape[1]
-            opt.t_dim = sum([feat_t[-1].shape[1] for feat_t in feat_ts])
-            opt.n_data = n_data
-            criterion_kd = CRDLoss(opt)
-            module_list.append(criterion_kd.embed_s)
-            module_list.append(criterion_kd.embed_t)
-            trainable_list.append(criterion_kd.embed_s)
-            trainable_list.append(criterion_kd.embed_t)
-            criterion_kds.append(criterion_kd)
-        elif opt.joint_mode== "joint_single":
-            opt.s_dim = feat_s[-1].shape[1]
-            opt.t_dim = feat_ts[-1][-1].shape[1]
-            opt.n_data = n_data
-            criterion_kd = CRDLoss(opt)
-            module_list.append(criterion_kd.embed_s)
-            module_list.append(criterion_kd.embed_t)
-            trainable_list.append(criterion_kd.embed_s)
-            trainable_list.append(criterion_kd.embed_t)
-            criterion_kds.append(criterion_kd)
+        opt.s_dim = feat_s[-1].shape[1]
+        opt.t_dim = sum([feat_t[-1].shape[1] for feat_t in feat_ts])
+        opt.n_data = n_data
+        criterion_kd = CRDLoss(opt)
+        module_list.append(criterion_kd.embed_s)
+        module_list.append(criterion_kd.embed_t)
+        trainable_list.append(criterion_kd.embed_s)
+        trainable_list.append(criterion_kd.embed_t)
+        criterion_kds.append(criterion_kd)
     else:
         raise NotImplementedError(opt.distill)
 
@@ -264,7 +240,7 @@ def main():
         print("==> training...")
 
         time1 = time.time()
-        train_acc, train_loss = train(epoch, train_loader, module_list, criterion_list, optimizer, opt)
+        train_acc, train_loss = train(epoch, train_loader, module_list, criterion_list, optimizer, opt, joint=True)
         time2 = time.time()
         print('epoch {}, total time {:.2f}'.format(epoch, time2 - time1))
 
