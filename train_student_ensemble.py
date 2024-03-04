@@ -119,9 +119,14 @@ def parse_option():
 
     ensemble_name = os.path.basename(opt.path_ensemble)
 
-    opt.model_name = 'S:{}_T:{}_{}_{}_r:{}_a:{}_b:{}_{}'.format(opt.model_s, ensemble_name, opt.dataset, opt.distill,
+    if opt.distill == "crd":
+        opt.model_name = 'S:{}_T:{}_{}_{}_{}_r:{}_a:{}_b:{}_{}'.format(opt.model_s, os.path.basename(ensemble_name),
+                                                                opt.dataset, opt.distill, opt.joint_mode,
                                                                 opt.gamma, opt.alpha, opt.beta, opt.trial)
-
+    else:
+        opt.model_name = 'S:{}_T:{}_{}_{}_r:{}_a:{}_b:{}_{}'.format(opt.model_s, os.path.basename(ensemble_name),
+                                                                       opt.dataset, opt.distill,
+                                                                       opt.gamma, opt.alpha, opt.beta, opt.trial)
     opt.tb_folder = os.path.join(opt.tb_path, opt.model_name)
     if not os.path.isdir(opt.tb_folder):
         os.makedirs(opt.tb_folder)
