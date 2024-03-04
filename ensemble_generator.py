@@ -20,7 +20,9 @@ def main():
     if not os.path.exists(opt.out_folder):
         os.makedirs(opt.out_folder)
     print(opt.models)
-    model_fs = [f for f in glob.glob(opt.models)]
+    model_fs = [os.path.join(f, os.path.basename(f).split("_")[0] + "_best.pth") for f in glob.glob(opt.models)]
+    # for each of the model extracth best model pth
+
     print(model_fs)
     # generate the ensembles
     for trial_idx in range(opt.n_trials):

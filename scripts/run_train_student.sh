@@ -22,4 +22,4 @@ FILE_TO_PROCESS=${FILES[$SLURM_ARRAY_TASK_ID-1]}
 echo "Processing file: $FOLDER/$FILE_TO_PROCESS"
 
 # Now pass the file to your python script
-python /home/gridsan/herol/RepDistiller/train_student_ensemble.py --model resnet20 --distill crd --joint_mode reg --trial $SLURM_ARRAY_TASK_ID --path_ensemble $FOLDER/$FILE_TO_PROCESS
+python /home/gridsan/herol/RepDistiller/train_student_ensemble.py --model resnet20 -a 0 -b 0.8 --distill crd --joint_mode reg --trial $SLURM_ARRAY_TASK_ID --path_ensemble $FOLDER/$FILE_TO_PROCESS
